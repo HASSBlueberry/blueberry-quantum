@@ -14,8 +14,8 @@ async def async_setup(hass,config):
     if DOMAIN in hass.data:return True
     hass.data[DOMAIN]={}
     path=Path(__file__).parent/'frontend'/'blueberry-quantum-card.js'
-    await hass.http.async_register_static_paths([StaticPathConfig('/blueberry_quantum/card.js',str(path),False)])
-    frontend.add_extra_js_url(hass,'/blueberry_quantum/card.js?v=0.2.0')
+    await hass.http.async_register_static_paths([StaticPathConfig('/blueberry_quantum/card.js',str(path),False),StaticPathConfig('/blueberry_quantum/quantum-panel.js',str(path.parent/'quantum-panel.js'),False)])
+    frontend.add_extra_js_url(hass,'/blueberry_quantum/card.js?v=0.3.0')
     websocket_api.async_register_command(hass,ws_request)
     return True
 
@@ -23,12 +23,13 @@ async def async_setup_entry(hass,entry):
     client=QuantumClient(async_get_clientsession(hass),entry.data['url'],entry.data['token'])
     async def update():
         try:
-            providers=(await client.request('providers'))['providers']
+            catalog=await client.request('providers')
+            providers=catalog['providers']
             snapshots={}
             for row in providers:
                 try:snapshots[row['id']]=await client.request('providers/'+row['id']+'/snapshot')
                 except (ClientError,TimeoutError,ValueError):snapshots[row['id']]={'error':'Provider unavailable. Reconnect in Quantum to retry authentication.'}
-            return {'providers':providers,'snapshots':snapshots}
+            return {'providers':providers,'snapshots':snapshots,'definitions':catalog.get('definitions',{})}
         except (ClientError,TimeoutError,ValueError) as error:raise UpdateFailed('Cannot reach Quantum') from error
     coordinator=DataUpdateCoordinator(hass,logging.getLogger(__name__),name='BlueberryQuantum',update_method=update,update_interval=timedelta(seconds=60))
     await coordinator.async_config_entry_first_refresh()
@@ -54,7 +55,7 @@ async def ws_request(hass,connection,msg):
     if not runtime:connection.send_error(msg['id'],'not_found','Quantum entry missing');return
     action=msg['action'];pid=msg.get('provider','')
     if action=='state':connection.send_result(msg['id'],runtime['coordinator'].data);return
-    if action not in ('configure','refresh','inspect','reconnect','delete','plan','apply','scan','sync','eero_login','eero_verify','eero_select'):
+    if action not in ('configure','refresh','inspect','reconnect','delete','plan','apply','scan','sync','eero_login','eero_verify','eero_select','invoke'):
         connection.send_error(msg['id'],'invalid_action','Unsupported action');return
     try:
         if action=='refresh':
