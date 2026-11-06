@@ -1,0 +1,18 @@
+{
+  "domain": "blueberry_quantum",
+  "name": "BlueberryQuantum",
+  "version": "0.2.0",
+  "config_flow": true,
+  "dependencies": [
+    "http",
+    "frontend"
+  ],
+  "codeowners": [
+    "@BlueberryFaygo"
+  ],
+  "documentation": "https://git.crit.rip/BlueberryFaygo/BlueberryFaygo/src/branch/main/sre/BlueberryQuantum",
+  "iot_class": "local_polling",
+  "integration_type": "hub",
+  "requirements": [],
+  "issue_tracker": "https://git.crit.rip/BlueberryFaygo/BlueberryFaygo/issues"
+}
