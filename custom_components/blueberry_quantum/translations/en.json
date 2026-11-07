@@ -1,1 +1,16 @@
-{"config":{"step":{"user":{"title":"Connect BlueberryQuantum","description":"Open the Quantum app through Ingress to copy its API token. Gateway credentials stay in the app.","data":{"url":"Quantum app URL","token":"Quantum app API token"}}},"error":{"cannot_connect":"Could not reach Quantum. Check the URL and app API token."}}}
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect BlueberryQuantum",
+        "description": "Enter the local BlueberryQuantum app URL. No app API token is required. Gateway credentials stay in the app.",
+        "data": {
+          "url": "Quantum app URL"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Could not reach BlueberryQuantum. Check the app URL and that the app is running."
+    }
+  }
+}

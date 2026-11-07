@@ -15,12 +15,17 @@ async def async_setup(hass,config):
     hass.data[DOMAIN]={}
     path=Path(__file__).parent/'frontend'/'blueberry-quantum-card.js'
     await hass.http.async_register_static_paths([StaticPathConfig('/blueberry_quantum/card.js',str(path),False),StaticPathConfig('/blueberry_quantum/quantum-panel.js',str(path.parent/'quantum-panel.js'),False)])
-    frontend.add_extra_js_url(hass,'/blueberry_quantum/card.js?v=0.3.0')
+    frontend.add_extra_js_url(hass,'/blueberry_quantum/card.js?v=0.4.0')
     websocket_api.async_register_command(hass,ws_request)
     return True
 
+async def async_migrate_entry(hass,entry):
+    if entry.version==1:
+        hass.config_entries.async_update_entry(entry,data={key:value for key,value in entry.data.items() if key!='token'},version=2)
+    return entry.version==2
+
 async def async_setup_entry(hass,entry):
-    client=QuantumClient(async_get_clientsession(hass),entry.data['url'],entry.data['token'])
+    client=QuantumClient(async_get_clientsession(hass),entry.data['url'])
     async def update():
         try:
             catalog=await client.request('providers')
